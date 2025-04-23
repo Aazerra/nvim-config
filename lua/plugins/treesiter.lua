@@ -1,0 +1,45 @@
+return {
+	"nvim-treesitter/nvim-treesitter",
+	dependencies = {
+		"nvim-treesitter/nvim-treesitter-context",
+		"nvim-treesitter/nvim-treesitter-refactor",
+	},
+	-- keys = {
+	-- 	{
+	-- 		"[c",
+	-- 		function()
+	-- 		end,
+	-- 		desc = "jump to context"
+	-- 	}
+	-- },
+	config = function()
+		require "nvim-treesitter.configs".setup {
+			ensure_installed = { "lua", "vim", "query", "markdown", "markdown_inline" },
+			sync_install = false,
+			auto_install = true,
+
+			highlight = {
+				enable = true,
+				disable = function(_, buf)
+					local max_filesize = 100 * 1024
+					local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+					if ok and stats and stats.size > max_filesize then
+						return true
+					end
+				end,
+				additional_vim_regex_highlighting = false,
+			},
+			refactor = {
+				smart_rename = {
+					enable = true,
+					keymaps = {
+						smart_rename  = "grr",
+					}
+				}
+			}
+		}
+		vim.keymap.set('n', '[c', function()
+			require("treesitter-context").go_to_context(vim.v.count1)
+		end, { desc = 'jump to context' })
+	end
+}
